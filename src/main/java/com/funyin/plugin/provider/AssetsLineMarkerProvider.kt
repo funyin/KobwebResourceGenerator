@@ -1,8 +1,8 @@
-package com.crzsc.plugin.provider
+package com.funyin.plugin.provider
 
-import com.crzsc.plugin.utils.FileHelperNew
-import com.crzsc.plugin.utils.PluginUtils.openFile
-import com.crzsc.plugin.utils.isSvgExtension
+import com.funyin.plugin.utils.FileHelperNew
+import com.funyin.plugin.utils.PluginUtils.openFile
+import com.funyin.plugin.utils.isSvgExtension
 import com.intellij.codeInsight.daemon.LineMarkerInfo
 import com.intellij.codeInsight.daemon.LineMarkerProvider
 import com.intellij.openapi.editor.markup.GutterIconRenderer
@@ -30,12 +30,11 @@ class AssetsLineMarkerProvider : LineMarkerProvider {
         val module = element.module
         if (!FlutterModuleUtils.isFlutterModule(module)) return null
         val elementType = (element as? LeafPsiElement?)?.elementType?.toString()
-        if (elementType == "REGULAR_STRING_PART"
-        ) {
+        if (elementType == "REGULAR_STRING_PART") {
             // 这里会被多次调用 尽量减少调用次数
             var assetName: String? = null
             if (module != null) {
-                FileHelperNew.getPubSpecConfig(module)?.let {
+                FileHelperNew.getGradleConfig(module)?.let {
                     assetName = FileHelperNew.getGeneratedFileName(it)
                 }
             }

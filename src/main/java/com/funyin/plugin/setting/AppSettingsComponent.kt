@@ -1,6 +1,6 @@
-package com.crzsc.plugin.setting
+package com.funyin.plugin.setting
 
-import com.crzsc.plugin.utils.message
+import com.funyin.plugin.utils.message
 import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBTextField

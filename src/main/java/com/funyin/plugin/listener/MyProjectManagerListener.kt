@@ -1,4 +1,4 @@
-package com.crzsc.plugin.listener
+package com.funyin.plugin.listener
 
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManagerListener
@@ -14,8 +14,7 @@ class MyProjectManagerListener : ProjectManagerListener {
         super.projectOpened(project)
         val treeListener = PsiTreeListener(project)
         eventsMap[project] = treeListener
-        PsiManager.getInstance(project).addPsiTreeChangeListener(
-                treeListener)
+        PsiManager.getInstance(project).addPsiTreeChangeListener(treeListener)
     }
 
     override fun projectClosing(project: Project) {

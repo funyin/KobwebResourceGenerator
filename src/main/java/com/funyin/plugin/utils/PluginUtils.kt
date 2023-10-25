@@ -1,4 +1,4 @@
-package com.crzsc.plugin.utils
+package com.funyin.plugin.utils
 
 import com.intellij.notification.NotificationDisplayType
 import com.intellij.notification.NotificationGroup
@@ -14,18 +14,9 @@ object PluginUtils {
 
     @JvmStatic
     fun showNotify(message: String?) {
-        val notificationGroup = NotificationGroup("FlutterAssetsGenerator", NotificationDisplayType.BALLOON, true)
+        val notificationGroup = NotificationGroup("KotlinResourceGenerator", NotificationDisplayType.BALLOON, true)
         ApplicationManager.getApplication().invokeLater {
             val notification = notificationGroup.createNotification(message!!, NotificationType.INFORMATION)
-            Notifications.Bus.notify(notification)
-        }
-    }
-
-    @JvmStatic
-    fun showError(message: String?) {
-        val notificationGroup = NotificationGroup("FlutterAssetsGenerator", NotificationDisplayType.BALLOON, true)
-        ApplicationManager.getApplication().invokeLater {
-            val notification = notificationGroup.createNotification(message!!, NotificationType.ERROR)
             Notifications.Bus.notify(notification)
         }
     }

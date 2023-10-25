@@ -1,7 +1,7 @@
 <idea-plugin>
-    <id>com.crzsc.FlutterAssetsGenerator</id>
-    <name>FlutterAssetsGenerator</name>
-    <vendor email="cr1992@qq.com" url="https://github.com/cr1992/FlutterAssetsGenerator">Ray&amp;Zsc</vendor>
+    <id>com.funyin.kresgen</id>
+    <name>KotlinResourceGenerator</name>
+    <vendor email="funyin.kash@gmail.com" url="https://github.com/cr1992/FlutterAssetsGenerator">Ray&amp;Zsc</vendor>
 
     <!-- please see https://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
          on how to target different products -->
@@ -10,37 +10,29 @@
     <!--    <depends>com.intellij.modules.java</depends>-->
     <depends>com.intellij.modules.all</depends>
     <depends>com.intellij.modules.platform</depends>
-    <depends>Dart</depends>
     <depends>org.jetbrains.kotlin</depends>
-    <depends>io.flutter</depends>
 
     <extensions defaultExtensionNs="com.intellij">
         <!-- Add your extensions here -->
-        <applicationService serviceImplementation="com.crzsc.plugin.setting.PluginSetting"/>
-        <applicationConfigurable parentId="tools" instance="com.crzsc.plugin.setting.AppSettingsConfigurable"
-                                 id="com.crzsc.plugin.setting.AppSettingsConfigurable"
-                                 displayName="FlutterAssetsGenerator"/>
-        <!--        行标记-->
-        <codeInsight.lineMarkerProvider language="Dart"
-                                        implementationClass="com.crzsc.plugin.provider.AssetsLineMarkerProvider"/>
+        <applicationService serviceImplementation="com.funyin.plugin.setting.PluginSetting"/>
+        <applicationConfigurable parentId="tools" instance="com.funyin.plugin.setting.AppSettingsConfigurable"
+                                 id="com.funyin.plugin.setting.AppSettingsConfigurable"
+                                 displayName="Kotlin Resource Generator"/>
+        <codeInsight.lineMarkerProvider language="Kotlin"
+                                        implementationClass="com.funyin.plugin.provider.AssetsLineMarkerProvider"/>
     </extensions>
 
     <applicationListeners>
-        <listener class="com.crzsc.plugin.listener.MyProjectManagerListener"
+        <listener class="com.funyin.plugin.listener.MyProjectManagerListener"
                   topic="com.intellij.openapi.project.ProjectManagerListener"/>
     </applicationListeners>
 
     <actions>
         <!-- Add your actions here -->
-        <action id="action.generate" class="com.crzsc.plugin.actions.GenerateAction" text="Generate Flutter Assets"
-                description="Generate Assets class ">
+        <action id="action.generate" class="com.funyin.plugin.actions.GenerateAction" text="Generate Kotlin Resources"
+                description="Generate kotlin resources class">
             <add-to-group group-id="BuildMenu" anchor="last"/>
             <keyboard-shortcut keymap="$default" first-keystroke="alt g"/>
-        </action>
-        <action id="com.crzsc.plugin.actions.GenerateDirAction" class="com.crzsc.plugin.actions.GenerateDirAction"
-                text="Flutter: Configuring Paths" description="Configuring Paths in pubspec.yaml"
-                icon="AllIcons.Actions.BuildLoadChanges">
-            <add-to-group group-id="ProjectViewPopupMenu" anchor="after" relative-to-action="WeighingNewGroup"/>
         </action>
     </actions>
 </idea-plugin>

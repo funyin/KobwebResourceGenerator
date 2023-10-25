@@ -1,4 +1,4 @@
-package com.crzsc.plugin.utils
+package com.funyin.plugin.utils
 
 import java.util.*
 

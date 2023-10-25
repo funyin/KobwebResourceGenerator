@@ -1,6 +1,6 @@
-package com.crzsc.plugin.setting
+package com.funyin.plugin.setting
 
-import com.crzsc.plugin.utils.Constants
+import com.funyin.plugin.utils.Constants
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.*
 import com.intellij.util.xmlb.XmlSerializerUtil

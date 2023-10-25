@@ -1,7 +1,7 @@
-package com.crzsc.plugin.listener
+package com.funyin.plugin.listener
 
-import com.crzsc.plugin.utils.FileGenerator
-import com.crzsc.plugin.utils.FileHelperNew
+import com.funyin.plugin.utils.FileGenerator
+import com.funyin.plugin.utils.FileHelperNew
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiDirectory
 import com.intellij.psi.PsiTreeChangeEvent
@@ -56,7 +56,7 @@ class PsiTreeListener(private val project: Project) : PsiTreeChangeListener {
     }
 
     private fun handleEvent(event: PsiTreeChangeEvent) {
-        val assets = FileHelperNew.getAssets(project)
+        val assets = FileHelperNew.getResources(project)
         for (config in assets) {
             if (FileHelperNew.isAutoDetectionEnable(config)) {
                 // 该Module开启了自动检测

@@ -1,14 +1,14 @@
-package com.crzsc.plugin.utils
+package com.funyin.plugin.utils
 
-import com.crzsc.plugin.setting.PluginSetting
+import com.funyin.plugin.setting.PluginSetting
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.guessModuleDir
 import com.intellij.openapi.vfs.VirtualFile
-import io.flutter.pub.PubRoot
-import io.flutter.utils.FlutterModuleUtils
+import org.jetbrains.kotlin.idea.configuration.isGradleModule
 import org.jetbrains.kotlin.idea.util.projectStructure.allModules
 import org.jetbrains.kotlin.konan.file.File
+import org.jetbrains.plugins.gradle.util.GradleModuleData
 import org.yaml.snakeyaml.Yaml
 import java.io.FileInputStream
 import java.util.*
@@ -23,72 +23,62 @@ object FileHelperNew {
      * 获取所有可用的Flutter Module的Asset配置
      */
     @JvmStatic
-    fun getAssets(project: Project): List<ModulePubSpecConfig> {
-        val modules = project.allModules()
-        val folders = mutableListOf<ModulePubSpecConfig>()
-        for (module in modules) {
-            if (FlutterModuleUtils.isFlutterModule(module)) {
-                val moduleDir = module.guessModuleDir()
-                if (moduleDir != null) {
-                    getPubSpecConfig(module)?.let {
-                        folders.add(it)
-                    }
+    fun getResources(project: Project): List<ModuleGradleConfig> {
+        val gradleModules = project.allModules().filter { it.isGradleModule() }
+        val folders = mutableListOf<ModuleGradleConfig>()
+        for (module in gradleModules) {
+            val moduleDir = module.guessModuleDir()
+            if (moduleDir != null) {
+                getGradleConfig(module)?.let {
+                    folders.add(it)
                 }
             }
         }
+
         return folders
     }
 
     @JvmStatic
     fun shouldActivateFor(project: Project): Boolean {
-        return FlutterModuleUtils.hasFlutterModule(project)
+        return project.allModules().any { it.isGradleModule() }
     }
 
-    fun tryGetAssetsList(map: Map<*, *>): MutableList<*>? {
-        (map["flutter"] as? Map<*, *>)?.let {
-            return it["assets"] as? MutableList<*>
-        }
-        return null
-    }
 
     @JvmStatic
-    fun getPubSpecConfig(module: Module): ModulePubSpecConfig? {
+    fun getGradleConfig(module: Module): ModuleGradleConfig? {
         try {
             val moduleDir = module.guessModuleDir()
-            val pubRoot = PubRoot.forDirectory(moduleDir)
-            if (moduleDir != null && pubRoot != null) {
-                val fis = FileInputStream(pubRoot.pubspec.path)
+            val gradleRoot = module.isGradleModule()
+            if (moduleDir != null && gradleRoot != null) {
+                val fis = FileInputStream(gradleRoot.gradle)
                 val pubConfigMap = Yaml().load(fis) as? Map<String, Any>
                 if (pubConfigMap != null) {
                     val assetVFiles = mutableListOf<VirtualFile>()
-                    (pubConfigMap["flutter"] as? Map<*, *>)?.let { configureMap ->
-                        (configureMap["assets"] as? ArrayList<*>)?.let { list ->
-                            for (path in list) {
-                                moduleDir.findFileByRelativePath(path as String)?.let {
-                                    if (it.isDirectory) {
-                                        val index = path.indexOf("/")
-                                        val assetsPath = if (index == -1) {
-                                            path
-                                        } else {
-                                            path.substring(0, index)
-                                        }
-                                        val assetVFile = moduleDir.findChild(assetsPath)
-                                            ?: moduleDir.createChildDirectory(this, assetsPath)
-                                        if (!assetVFiles.contains(assetVFile)) {
-                                            assetVFiles.add(assetVFile)
-                                        }
-                                    } else {
-                                        if (!assetVFiles.contains(it)) {
-                                            assetVFiles.add(it)
-                                        }
-                                    }
+                    val resources = mutableListOf("")
+                    for (path in resources) {
+                        moduleDir.findFileByRelativePath(path)?.let {
+                            if (it.isDirectory) {
+                                val index = path.indexOf("/")
+                                val assetsPath = if (index == -1) {
+                                    path
+                                } else {
+                                    path.substring(0, index)
+                                }
+                                val assetVFile = moduleDir.findChild(assetsPath)
+                                    ?: moduleDir.createChildDirectory(this, assetsPath)
+                                if (!assetVFiles.contains(assetVFile)) {
+                                    assetVFiles.add(assetVFile)
+                                }
+                            } else {
+                                if (!assetVFiles.contains(it)) {
+                                    assetVFiles.add(it)
                                 }
                             }
                         }
                     }
-                    return ModulePubSpecConfig(
+                    return ModuleGradleConfig(
                         module,
-                        pubRoot,
+                        gradleRoot,
                         assetVFiles,
                         pubConfigMap,
                     )
@@ -104,7 +94,7 @@ object FileHelperNew {
     /**
      * 读取配置
      */
-    private fun readSetting(config: ModulePubSpecConfig, key: String): Any? {
+    private fun readSetting(config: ModuleGradleConfig, key: String): Any? {
         (config.map[Constants.KEY_CONFIGURATION_MAP] as? Map<*, *>)?.let { configureMap ->
             return configureMap[key]
         }
@@ -114,14 +104,14 @@ object FileHelperNew {
     /**
      * 是否开启了自动检测
      */
-    fun isAutoDetectionEnable(config: ModulePubSpecConfig): Boolean {
+    fun isAutoDetectionEnable(config: ModuleGradleConfig): Boolean {
         return readSetting(config, Constants.KEY_AUTO_DETECTION) as Boolean? ?: PluginSetting.instance.autoDetection
     }
 
     /**
      * 是否根据父文件夹命名 默认true
      */
-    fun isNamedWithParent(config: ModulePubSpecConfig): Boolean {
+    fun isNamedWithParent(config: ModuleGradleConfig): Boolean {
         return readSetting(config, Constants.KEY_NAMED_WITH_PARENT) as Boolean?
             ?: PluginSetting.instance.namedWithParent
     }
@@ -129,7 +119,7 @@ object FileHelperNew {
     /**
      * 读取生成的类名配置
      */
-    fun getGeneratedClassName(config: ModulePubSpecConfig): String {
+    fun getGeneratedClassName(config: ModuleGradleConfig): String {
         return readSetting(config, Constants.KEY_CLASS_NAME) as String? ?: PluginSetting.instance.className
         ?: Constants.DEFAULT_CLASS_NAME
     }
@@ -137,7 +127,7 @@ object FileHelperNew {
     /**
      * 读取文件分割配置
      */
-    fun getFilenameSplitPattern(config: ModulePubSpecConfig): String {
+    fun getFilenameSplitPattern(config: ModuleGradleConfig): String {
         return try {
             val pattern =
                 readSetting(config, Constants.FILENAME_SPLIT_PATTERN) as String?
@@ -153,7 +143,7 @@ object FileHelperNew {
     /**
      * 读取忽略文件目录
      */
-    fun getPathIgnore(config: ModulePubSpecConfig): List<String> {
+    fun getPathIgnore(config: ModuleGradleConfig): List<String> {
         return try {
             val paths =
                 readSetting(config, Constants.PATH_IGNORE) as List<String>?
@@ -197,17 +187,17 @@ object FileHelperNew {
     /**
      * 获取需要生成的文件 如果没有则会创建文件
      */
-    fun getGeneratedFile(config: ModulePubSpecConfig): VirtualFile {
+    fun getGeneratedFile(config: ModuleGradleConfig): VirtualFile {
         return getGeneratedFilePath(config).let {
             val configName = getGeneratedFileName(config)
             return@let it.findOrCreateChildData(
                 it,
-                "$configName.dart"
+                "$configName.kt"
             )
         }
     }
 
-    fun getGeneratedFileName(config: ModulePubSpecConfig): String =
+    fun getGeneratedFileName(config: ModuleGradleConfig): String =
         readSetting(config, Constants.KEY_OUTPUT_FILENAME) as? String ?: PluginSetting.instance.fileName
         ?: Constants.DEFAULT_CLASS_NAME.lowercase()
 
@@ -216,10 +206,9 @@ object FileHelperNew {
 /**
  * 模块Flutter配置信息
  */
-data class ModulePubSpecConfig(
+data class ModuleGradleConfig(
     val module: Module,
     val pubRoot: PubRoot,
     val assetVFiles: List<VirtualFile>,
     val map: Map<String, Any>,
-    val isFlutterModule: Boolean = FlutterModuleUtils.isFlutterModule(module)
 )

@@ -1,4 +1,4 @@
-package com.crzsc.plugin.setting
+package com.funyin.plugin.setting
 
 import com.intellij.openapi.options.Configurable
 import javax.swing.JComponent

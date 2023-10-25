@@ -1,10 +1,10 @@
-package com.crzsc.plugin.utils
+package com.funyin.plugin.utils
 
 object Constants {
     /**
      * 配置map的key
      */
-    const val KEY_CONFIGURATION_MAP = "flutter_assets_generator"
+    const val KEY_CONFIGURATION_MAP = "KobwebResourceGenerator"
     /**
      * 输出目录的key
      */
